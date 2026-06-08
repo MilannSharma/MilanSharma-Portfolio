@@ -32,7 +32,9 @@ import {
   Eye,
   EyeOff,
   Image,
-  ImagePlus
+  ImagePlus,
+  Menu,
+  X
 } from 'lucide-react';
 import { PortfolioSettings, Lead, Product, Skill, Project, CertificationCategory, LifeStyle } from '../types';
 import { getDbStatus, SQL_SCHEMA, fetchLeads, fetchAnalytics, AnalyticsData, supabase, parseMarkdown, formatImageUrl } from '../db';
@@ -208,6 +210,7 @@ Decoupling systems using this approach yields high developer productivity and lo
 
 const AdminCMS: React.FC<AdminCMSProps> = ({ settings, onSaveSettings, onLogout }) => {
   const [activeTab, setActiveTab] = useState<CMSTab>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [localSettings, setLocalSettings] = useState<PortfolioSettings>(settings);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
@@ -957,29 +960,49 @@ You must respond ONLY with a JSON object (no markdown wrapping like \`\`\`json) 
   };
 
   return (
-    <div className="flex h-screen w-screen bg-[#090909] text-gray-300 overflow-hidden font-sans">
+    <div className="flex h-screen w-screen bg-[#090909] text-gray-300 overflow-hidden font-sans relative">
       
+      {/* Mobile Drawer Overlay */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)} 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden transition-all duration-300"
+        />
+      )}
+
       {/* CMS Side Navigation */}
-      <aside className="w-[280px] bg-[#111111] border-r border-[#222] flex flex-col justify-between p-6 shrink-0 h-full select-none">
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] bg-[#111111] border-r border-[#222] flex flex-col justify-between p-6 shrink-0 h-full select-none transition-transform duration-300 transform ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1.5 pb-6 border-b border-[#222]">
-            <h1 className="text-lg font-black text-white tracking-tighter flex items-center gap-2">
-              Milan CMS <span className="text-[#f59e0b] text-xs font-mono uppercase bg-[#f59e0b]/10 border border-[#f59e0b]/20 px-2 py-0.5 rounded-lg">Admin</span>
-            </h1>
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Control Panel v2.0</p>
+          <div className="flex items-center justify-between pb-6 border-b border-[#222]">
+            <div className="flex flex-col gap-1.5">
+              <h1 className="text-lg font-black text-white tracking-tighter flex items-center gap-2">
+                Milan CMS <span className="text-[#f59e0b] text-xs font-mono uppercase bg-[#f59e0b]/10 border border-[#f59e0b]/20 px-2 py-0.5 rounded-lg">Admin</span>
+              </h1>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Control Panel v2.0</p>
+            </div>
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden p-1.5 text-gray-400 hover:text-white bg-[#121212] border border-[#222] rounded-xl hover:bg-[#1a1a1a] transition-all"
+              aria-label="Close Navigation Menu"
+              title="Close Navigation Menu"
+            >
+              <X size={15} />
+            </button>
           </div>
           
           <nav className="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-220px)] pr-1 no-scrollbar">
-            <CMSNavItem active={activeTab === 'dashboard'} icon={<LayoutDashboard size={15} />} label="Dashboard" onClick={() => setActiveTab('dashboard')} />
-            <CMSNavItem active={activeTab === 'leads'} icon={<Users size={15} />} label="Leads Inbox" onClick={() => setActiveTab('leads')} />
-            <CMSNavItem active={activeTab === 'profile'} icon={<User size={15} />} label="Profile & Bio" onClick={() => setActiveTab('profile')} />
-            <CMSNavItem active={activeTab === 'experience'} icon={<Briefcase size={15} />} label="Experience" onClick={() => setActiveTab('experience')} />
-            <CMSNavItem active={activeTab === 'products'} icon={<ChevronRight size={15} />} label="Products Section" onClick={() => setActiveTab('products')} />
-            <CMSNavItem active={activeTab === 'projects'} icon={<FolderGit2 size={15} />} label="GitHub & Projects" onClick={() => setActiveTab('projects')} />
-            <CMSNavItem active={activeTab === 'blogs'} icon={<BookOpen size={15} />} label="Blogs Manager" onClick={() => setActiveTab('blogs')} />
-            <CMSNavItem active={activeTab === 'skills_certs'} icon={<Wrench size={15} />} label="Skills & Certs" onClick={() => setActiveTab('skills_certs')} />
-            <CMSNavItem active={activeTab === 'database'} icon={<Database size={15} />} label="Supabase DB" onClick={() => setActiveTab('database')} />
-            <CMSNavItem active={activeTab === 'settings'} icon={<Settings size={15} />} label="CMS Settings" onClick={() => setActiveTab('settings')} />
+            <CMSNavItem active={activeTab === 'dashboard'} icon={<LayoutDashboard size={15} />} label="Dashboard" onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'leads'} icon={<Users size={15} />} label="Leads Inbox" onClick={() => { setActiveTab('leads'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'profile'} icon={<User size={15} />} label="Profile & Bio" onClick={() => { setActiveTab('profile'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'experience'} icon={<Briefcase size={15} />} label="Experience" onClick={() => { setActiveTab('experience'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'products'} icon={<ChevronRight size={15} />} label="Products Section" onClick={() => { setActiveTab('products'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'projects'} icon={<FolderGit2 size={15} />} label="GitHub & Projects" onClick={() => { setActiveTab('projects'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'blogs'} icon={<BookOpen size={15} />} label="Blogs Manager" onClick={() => { setActiveTab('blogs'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'skills_certs'} icon={<Wrench size={15} />} label="Skills & Certs" onClick={() => { setActiveTab('skills_certs'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'database'} icon={<Database size={15} />} label="Supabase DB" onClick={() => { setActiveTab('database'); setIsSidebarOpen(false); }} />
+            <CMSNavItem active={activeTab === 'settings'} icon={<Settings size={15} />} label="CMS Settings" onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
           </nav>
         </div>
         
@@ -995,42 +1018,52 @@ You must respond ONLY with a JSON object (no markdown wrapping like \`\`\`json) 
       <main className="flex-1 min-w-0 bg-[#090909] flex flex-col h-full overflow-hidden">
         
         {/* Header Save Bar */}
-        <div className="flex items-center justify-between border-b border-[#222] px-8 py-6 bg-[#111111]/40 shrink-0">
-          <div>
-            <h2 className="text-xl md:text-2xl font-black text-white capitalize">{activeTab.replace('_', ' & ')} Settings</h2>
-            <p className="text-gray-500 text-xs mt-1">Configure and manage your portfolio website details.</p>
+        <div className="flex items-center justify-between border-b border-[#222] px-4 sm:px-6 md:px-8 py-4 sm:py-5 bg-[#111111]/40 shrink-0 gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden p-2 bg-[#111111] border border-[#222] rounded-xl text-gray-400 hover:text-white hover:bg-[#1a1a1a] transition-all shrink-0"
+              aria-label="Open Navigation Menu"
+              title="Open Navigation Menu"
+            >
+              <Menu size={16} />
+            </button>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg md:text-xl font-black text-white capitalize truncate">{activeTab.replace('_', ' & ')} Settings</h2>
+              <p className="text-gray-500 text-[10px] sm:text-xs mt-0.5 truncate hidden sm:block">Configure and manage your portfolio website details.</p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             {saveStatus === 'saving' && (
-              <span className="text-xs text-gray-400 flex items-center gap-2 bg-[#121212] border border-[#222] px-3.5 py-1.5 rounded-xl">
+              <span className="text-xs text-gray-400 flex items-center gap-2 bg-[#121212] border border-[#222] px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl">
                 <RefreshCw size={12} className="animate-spin text-[#f59e0b]" /> 
-                Auto-saving...
+                <span className="hidden sm:inline">Auto-saving...</span>
               </span>
             )}
             {saveStatus === 'success' && (
-              <span className="text-xs text-green-400 flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 px-3.5 py-1.5 rounded-xl">
+              <span className="text-xs text-green-400 flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl">
                 <CheckCircle size={12} /> 
-                Saved Real-time
+                <span className="hidden sm:inline">Saved Real-time</span>
               </span>
             )}
             {saveStatus === 'error' && (
-              <span className="text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 px-3.5 py-1.5 rounded-xl">
+              <span className="text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl">
                 <AlertTriangle size={12} /> 
-                Sync Failed
+                <span className="hidden sm:inline">Sync Failed</span>
               </span>
             )}
             {saveStatus === 'idle' && (
-              <span className="text-xs text-gray-500 flex items-center gap-1.5 bg-[#121212] border border-[#222]/60 px-3.5 py-1.5 rounded-xl select-none">
+              <span className="text-xs text-gray-500 flex items-center gap-1.5 bg-[#121212] border border-[#222]/60 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl select-none">
                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                Live Connected
+                <span className="hidden sm:inline">Live Connected</span>
               </span>
             )}
           </div>
         </div>
 
         {/* Scrollable Content Workspace */}
-        <div className="flex-1 overflow-y-auto p-8 md:p-12 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 no-scrollbar">
           <div className="max-w-6xl mx-auto space-y-6">
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
